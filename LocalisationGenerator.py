@@ -1,6 +1,10 @@
-def focustreeType():
+from pathlib import Path
+
+
+def focustreeType(modDirectory):
     fileName = input("Enter filename to read in from: ")
     fileName = fileName + ".txt"
+    fileName = modDirectory + "/common/national_focus/" + fileName
     f = open(fileName, 'r')
     file = f.readlines()
 
@@ -27,21 +31,50 @@ def focustreeType():
 
     fileName = input("Enter a filename to write these ids to: ")
     fileName = fileName + ".yml"
-    f = open(fileName, 'w+')
+    fileName = modDirectory + "/localisation/" + fileName
+    filePath = Path(fileName)
+    if filePath.is_file():
+        locFile = open(fileName, "a")
+    else:
+        locFile = open(fileName, 'w+')
 
-    f.writelines("#Focus IDs:\n")
+    locFile.writelines("#Focus IDs:\n")
     for string in focusIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not locFile.readline().startswith(snippedString):
+                locFile.writelines(string)
+        except:
 
-    f.writelines("#Tooltip IDs:\n")
+            locFile.writelines(string)
+
+    locFile.writelines("#Tooltip IDs:\n")
     for string in tooltipIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not locFile.readline().startswith(snippedString):
+                locFile.writelines(string)
+        except:
+            locFile.writelines(string)
 
-    f.close()
+    locFile.close()
 
-def eventType():
+    with open(fileName, "r+") as f:
+        lines_seen = set()
+
+        d = f.readlines()
+        f.seek(0)
+        for i in d:
+            a, b, c = i.partition(":")
+            if a not in lines_seen:
+                f.writelines(i)
+                lines_seen.add(a)
+        f.truncate()
+
+def eventType(modDirectory):
     fileName = input("Enter filename to read in from: ")
     fileName = fileName + ".txt"
+    fileName = modDirectory + "/events/" + fileName
     f = open(fileName, 'r')
     file = f.readlines()
 
@@ -53,15 +86,15 @@ def eventType():
 
         if strippedString.startswith("title = "):
             removedIDString = strippedString.replace("title = ", "")
-            removedIDString = removedIDString + ":0 \"Placeholder Title\" \n"
+            removedIDString = removedIDString + ":0 \"Placeholder Localisation\" \n"
             eventIds.append(removedIDString)
         elif strippedString.startswith("desc = "):
             removedIDString = strippedString.replace("desc = ", "")
-            removedIDString = removedIDString + ":0 \"Placeholder Description\" \n"
+            removedIDString = removedIDString + ":0 \"Placeholder Localisation\" \n"
             eventIds.append(removedIDString)
         elif strippedString.startswith("name = "):
             removedIDString = strippedString.replace("name = ", "")
-            removedIDString = removedIDString + ":0 \"Placeholder Description\" \n"
+            removedIDString = removedIDString + ":0 \"Placeholder Localisation\" \n"
             eventIds.append(removedIDString)
         elif strippedString.startswith("custom_effect_tooltip = "):
             removedIDString = strippedString.replace("custom_effect_tooltip = ", "")
@@ -76,22 +109,50 @@ def eventType():
 
     fileName = input("Enter a filename to write these ids to: ")
     fileName = fileName + ".yml"
-    f = open(fileName, 'w+')
+    fileName = modDirectory + "/localisation/" + fileName
+    filePath = Path(fileName)
+    if filePath.is_file():
+        f = open(fileName, "a")
+    else:
+        f = open(fileName, 'w+')
 
     f.writelines("#Event IDs:\n")
     for string in eventIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not f.readline().startswith(snippedString):
+                f.writelines(string)
+        except:
+            f.writelines(string)
 
     f.writelines("#Tooltip IDs:\n")
     for string in toolTipIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not f.readline().startswith(snippedString):
+                f.writelines(string)
+        except:
+            f.writelines(string)
 
     f.close()
 
+    with open(fileName, "r+") as f:
+        lines_seen = set()
 
-def ideaType():
+        d = f.readlines()
+        f.seek(0)
+        for i in d:
+            a, b, c = i.partition(":")
+            if a not in lines_seen:
+                f.writelines(i)
+                lines_seen.add(a)
+        f.truncate()
+
+
+def ideaType(modDirectory):
     fileName = input("Enter filename to read in from: ")
     fileName = fileName + ".txt"
+    fileName = modDirectory + "/common/ideas/" + fileName
     f = open(fileName, 'r')
     file = f.readlines()
 
@@ -100,7 +161,10 @@ def ideaType():
 
     bannedStrings = ("ideas = ", "country = ", "modifier = ", "available = ", "allowed = ", "targeted_modifier = ",
                      "allowed_civil_war = ", "research_bonus = ", "equipment_bonus = ", "infantry_equipment = ",
-                     "motorized_equipment = ", "demolitions_equipment = ")
+                     "motorized_equipment = ", "demolitions_equipment = ", "visible = ", "limit = ", "ai_will_do = ",
+                     "allowed_to_remove = ", "hidden_trigger = ", "on_add = ", "#", "set_temp_variable = ",
+                     "add_dynamic_modifier = ", "set_variable = ", "any_enemy_country = ", "check_variable = ",
+                     "hidden_ideas = ", "has_country_flag = ", "set_country_flag = ")
 
     for string in file:
         strippedString = string.strip()
@@ -118,26 +182,54 @@ def ideaType():
             removedIDString = strippedString.replace("tooltip = ", "")
             removedIDString = removedIDString + ":0 \"Placeholder Localisation\" \n"
             toolTipIds.append(removedIDString)
+        elif strippedString.startswith("custom_trigger_tooltip = "):
+            removedIDString = strippedString.replace("custom_trigger_tooltip = ", "")
+            removedIDString = removedIDString + ":0 \"Placeholder Localisation\" \n"
+            toolTipIds.append(removedIDString)
 
     f.close()
 
     fileName = input("Enter a filename to write these ids to: ")
     fileName = fileName + ".yml"
+    fileName = modDirectory + "/localisation/" + fileName
     f = open(fileName, 'w+')
 
     f.writelines("#Idea IDs:\n")
     for string in ideaIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not f.readline().startswith(snippedString):
+                f.writelines(string)
+        except:
+            f.writelines(string)
 
     f.writelines("#Tooltip IDs:\n")
     for string in toolTipIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not f.readline().startswith(snippedString):
+                f.writelines(string)
+        except:
+            f.writelines(string)
 
     f.close()
 
-def decisionType():
+    with open(fileName, "r+") as f:
+        lines_seen = set()
+
+        d = f.readlines()
+        f.seek(0)
+        for i in d:
+            a, b, c = i.partition(":")
+            if a not in lines_seen:
+                f.writelines(i)
+                lines_seen.add(a)
+        f.truncate()
+
+def decisionType(modDirectory):
     fileName = input("Enter filename to read in from: ")
     fileName = fileName + ".txt"
+    fileName = modDirectory + "/common/decisions/" + fileName
     f = open(fileName, 'r')
     file = f.readlines()
 
@@ -169,17 +261,44 @@ def decisionType():
 
     fileName = input("Enter a filename to write these ids to: ")
     fileName = fileName + ".yml"
-    f = open(fileName, 'w+')
+    fileName = modDirectory + "/localisation/" + fileName
+    filePath = Path(fileName)
+    if filePath.is_file():
+        f = open(fileName, "a")
+    else:
+        f = open(fileName, 'w+')
 
     f.writelines("#Decision IDs:\n")
     for string in decisionIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not f.readline().startswith(snippedString):
+                f.writelines(string)
+        except:
+            f.writelines(string)
 
     f.writelines("#Tooltip IDs:\n")
     for string in toolTipIds:
-        f.writelines(string)
+        try:
+            snippedString = string.strip(":0 \"Placeholder Localisation\" \n")
+            if not f.readline().startswith(snippedString):
+                f.writelines(string)
+        except:
+            f.writelines(string)
 
     f.close()
+
+    with open(fileName, "r+") as f:
+        lines_seen = set()
+
+        d = f.readlines()
+        f.seek(0)
+        for i in d:
+            a, b, c = i.partition(":")
+            if a not in lines_seen:
+                f.writelines(i)
+                lines_seen.add(a)
+        f.truncate()
 
 
 if __name__ == '__main__':
@@ -192,14 +311,17 @@ if __name__ == '__main__':
 
     fileType = fileType.upper()
 
+    ### ENTER YOUR MOD DIRECTORY BELOW ###
+    modDirectory = "C:/userdirectory/moddirectory"
+
     if fileType == "F":
-        focustreeType()
+        focustreeType(modDirectory)
     elif fileType == "E":
-        eventType()
+        eventType(modDirectory)
     elif fileType == "I":
-        ideaType()
+        ideaType(modDirectory)
     elif fileType == "D":
-        decisionType()
+        decisionType(modDirectory)
     else:
         print("invalid entry >:(")
 
