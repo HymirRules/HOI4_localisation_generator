@@ -4,8 +4,6 @@ import os
 import sys
 import argparse
 import re
-import json
-
 
 class FileTypes(Enum):
     focustree = 1
