@@ -11,7 +11,7 @@ class FileTypes(Enum):
     events = 3
     decisions = 4
 
-def import_techs_units(mod_directory):
+def import_techs_units_equipment(mod_directory):
     techPath = Path(mod_directory) / "common" / "technologies"
     remove_ids = [
         re.compile("(={)$")
@@ -50,10 +50,18 @@ def import_techs_units(mod_directory):
         re.compile("OR="),
         re.compile("hidden_effect="),
         re.compile("allow="),
-        re.compile("ai_research_weights=")
+        re.compile("ai_research_weights="),
+        re.compile("resources="),
+        re.compile("equipments="),
+        re.compile("default_modules="),
+        re.compile("module_slots="),
+        re.compile("fixed_ship"),
+        re.compile("custom_slot="),
+        re.compile("upgrades="),
+        re.compile("enable_equipment_modules=")
     ]
 
-    techs_and_units = []
+    techs_and_units_and_equipment = []
 
     if os.path.isdir(techPath):
         for fileName in os.listdir(techPath):
@@ -69,7 +77,9 @@ def import_techs_units(mod_directory):
                             for uniqueId in remove_ids:
                                 remove_id = re.search(uniqueId, s)
                                 if not remove_id == None:
-                                    techs_and_units.append(re.compile(s))
+                                    ignore_ids.append(re.compile(s.replace(remove_id.group(0), "")))
+                                    techs_and_units_and_equipment.append(re.compile(s))
+
 
     unitsPath = Path(mod_directory) / "common" / "units"
 
@@ -87,10 +97,32 @@ def import_techs_units(mod_directory):
                         for uniqueId in remove_ids:
                             remove_id = re.search(uniqueId, s)
                             if not remove_id == None:
-                                techs_and_units.append(re.compile(s))
+                                ignore_ids.append(re.compile(s.replace(remove_id.group(0), "")))
+                                techs_and_units_and_equipment.append(re.compile(s))
 
 
-    return techs_and_units
+    equipmentPath = Path(unitsPath) / "equipment"
+
+    equipments = []
+
+    if os.path.isdir(equipmentPath):
+        for fileName in os.listdir(equipmentPath):
+            if fileName.endswith(".txt"):
+                equipmentFile = Path(equipmentPath) / fileName
+                with open(equipmentFile, "r") as f:
+                    equipment = f.readlines()
+                for s in equipment:
+                    s = s.strip()
+                    s = s.replace(" ", "")
+                    if (any(regex.search(s) for regex in remove_ids)
+                            and not any(r.search(s) for r in ignore_ids)):
+                        for uniqueId in remove_ids:
+                            remove_id = re.search(uniqueId, s)
+                            if not remove_id == None:
+                                ignore_ids.append(re.compile(s.replace(remove_id.group(0), "")))
+                                techs_and_units_and_equipment.append(re.compile(s))
+
+    return techs_and_units_and_equipment
 
 
 
@@ -160,7 +192,7 @@ if __name__ == '__main__':
         print("This file does not exist")
         sys.exit()
 
-    import_techs_units(mod_location)
+    import_techs_units_equipment(mod_location)
 
     with open(file_path, 'r') as f:
         file = f.readlines()
@@ -199,8 +231,10 @@ if __name__ == '__main__':
         re.compile("effect_tooltip=")
     ]
 
-    for tech_unit in import_techs_units(mod_location):
+    for tech_unit in import_techs_units_equipment(mod_location):
         idsToIgnoreRegex.append(tech_unit)
+
+    print(len(idsToIgnoreRegex))
 
     for string in file:
         string = string.strip()
