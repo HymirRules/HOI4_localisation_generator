@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import re
+import json
 
 
 class FileTypes(Enum):
@@ -11,6 +12,42 @@ class FileTypes(Enum):
     ideas = 2
     events = 3
     decisions = 4
+
+def import_techs_units(mod_directory):
+    techPath = Path(mod_directory) / "common" / "technologies"
+    remove_ids = [
+        re.compile("(={)$")
+    ]
+    ignore_ids = [
+        re.compile("type={"),
+        re.compile("categories={"),
+        re.compile("fort={"),
+        re.compile("need={"),
+    ]
+    unitsPath = Path(mod_directory) / "common" / "units"
+
+
+    techs = []
+
+    if os.path.isdir(techPath):
+        for fileName in os.listdir(techPath):
+            if fileName.endswith(".txt"):
+                techFile = Path(techPath) / fileName
+                with open(techFile, "r") as f:
+                    tech = f.readline()
+                for s in tech:
+                    s = s.strip()
+                    s = s.replace(" ", "")
+                    if (any(regex.search(s) for regex in remove_ids)
+                        and not any(r.search(s) for r in ignore_ids)):
+                            for uniqueId in remove_ids:
+                                remove_id = re.search(uniqueId, s)
+                                if not remove_id == None:
+                                    techs.append(s)
+
+    print(techs)
+
+
 
 
 if __name__ == '__main__':
@@ -32,13 +69,13 @@ if __name__ == '__main__':
 
     local_parser.add_argument(
         'FilePath',
-        metavar='filepath',
+        metavar='filename',
         type=Path,
         help="path to the starting file")
 
     local_parser.add_argument(
         'LocPath',
-        metavar='locpath',
+        metavar='locname',
         type=Path,
         help="path to the localisation file")
 
@@ -78,10 +115,14 @@ if __name__ == '__main__':
         print("This file does not exist")
         sys.exit()
 
+    import_techs_units(mod_location)
+
     with open(file_path, 'r') as f:
         file = f.readlines()
 
     fileIds = []
+
+
 
     idsToIgnoreRegex = [
         re.compile("[0-9]+="),
@@ -110,6 +151,8 @@ if __name__ == '__main__':
         re.compile("convoy="),
         re.compile("^[a-zA-Z]{3}={$")
     ]
+
+
 
     for string in file:
         string = string.strip()
