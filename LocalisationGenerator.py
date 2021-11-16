@@ -103,8 +103,6 @@ def import_techs_units_equipment(mod_directory):
 
     equipmentPath = Path(unitsPath) / "equipment"
 
-    equipments = []
-
     if os.path.isdir(equipmentPath):
         for fileName in os.listdir(equipmentPath):
             if fileName.endswith(".txt"):
@@ -198,8 +196,6 @@ if __name__ == '__main__':
         file = f.readlines()
 
     fileIds = []
-
-
 
     idsToIgnoreRegex = [
         re.compile("[0-9]+="),
