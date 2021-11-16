@@ -230,7 +230,7 @@ if __name__ == '__main__':
     for tech_unit in import_techs_units_equipment(mod_location):
         idsToIgnoreRegex.append(tech_unit)
 
-    print(len(idsToIgnoreRegex))
+    # print(len(idsToIgnoreRegex))
 
     for string in file:
         string = string.strip()
